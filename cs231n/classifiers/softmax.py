@@ -34,7 +34,84 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    D = W.shape[0]  # Number of features
+    C = W.shape[1]  # Number of classes
+    N = X.shape[0]  # Number of training examples
+
+    for i in range(N):
+        # softmax = P(yi|xi) = exp(Wj.T * xi) / sum(exp(Wk.T * xi)
+        # loss = -log(P(yi|xi)) = -log(exp(Wj.T * xi) / sum(exp(Wk.T * xi)))
+        scores = X[i].dot(W)
+
+        # Ensure numeric stability (from https://cs231n.github.io/linear-classify/#softmax)
+        # Shift score values so that the highest value is 0
+        log_C = -1 * np.max(scores)
+        scores += log_C
+        exp_scores = np.exp(scores)
+
+        softmax = exp_scores / np.sum(exp_scores)
+        loss += -1 * np.log(softmax[y[i]])
+
+        for j in range(C):
+            # dW = (P(yi|xi) - 1) * xi
+            dW[:, j] += (softmax[j] - (j == y[i])) * X[i]
+
+    loss /= N
+    loss += reg * np.sum(W * W)
+    dW /= N
+    dW += reg * W
+
+    # def calculate_softmax_probs(scores):
+    #     """
+    #     Softmax function: P(yi|xi) = exp(Wj.T * xi) / sum(exp(Wk.T * xi))
+
+    #     Input:
+    #     - scores: A numpy array of shape (C,) containing the scores for all classes
+
+    #     Returns:
+    #     - softmax: A numpy array of shape (C,) containing the softmax probabilities for all classes
+    #     """
+    #     scores -= np.max(scores)
+    #     exp_scores = np.exp(scores)
+    #     softmax = exp_scores / np.sum(exp_scores)
+    #     return softmax
+
+    # # Calculate the loss
+    # for i in range(N):
+    #     scores = X[i].dot(W)
+    #     softmax_probs = calculate_softmax_probs(scores)
+    #     loss += -1 * np.log(softmax_probs[y[i]])
+
+    # loss /= N
+    # loss += reg * np.sum(W * W)
+
+    # print(loss)
+
+    # # Calculate the numerical gradient
+    # epsilon = 1e-4
+    # W_plus = np.zeros((D, C))
+    # W_minus = np.zeros((D, C))
+
+    # for i in range(D):
+    #     print(f"Feature # {i} out of {D}")
+    #     for j in range(C):
+    #         W_plus[i, j] = W[i, j] + epsilon
+    #         W_minus[i, j] = W[i, j] - epsilon
+    #         loss_plus = 0.0
+    #         loss_minus = 0.0
+    #         for k in range(N):
+    #             scores_plus = X[k].dot(W_plus)
+    #             scores_minus = X[k].dot(W_minus)
+    #             softmax_probs_plus = calculate_softmax_probs(scores_plus)
+    #             softmax_probs_minus = calculate_softmax_probs(scores_minus)
+    #             loss_plus += -1 * np.log(softmax_probs_plus[y[k]])
+    #             loss_minus += -1 * np.log(softmax_probs_minus[y[k]])
+
+    #         loss_plus /= N
+    #         loss_minus /= N
+    #         dW[i, j] = (loss_plus - loss_minus) / (2 * epsilon)
+
+    # dW += reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
