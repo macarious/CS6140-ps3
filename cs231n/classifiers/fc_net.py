@@ -55,7 +55,13 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # Initialize weights and biases in layer 1
+        self.params['W1'] = np.random.normal(0, weight_scale, (input_dim, hidden_dim))
+        self.params['b1'] = np.zeros(hidden_dim)
+        
+        # Initialize weights and biases in layer 2
+        self.params['W2'] = np.random.normal(0, weight_scale, (hidden_dim, num_classes))
+        self.params['b2'] = np.zeros(num_classes)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -88,7 +94,8 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        output1, cache1 = affine_relu_forward(X, self.params['W1'], self.params['b1'])
+        scores, cache2 = affine_forward(output1, self.params['W2'], self.params['b2'])
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -112,7 +119,33 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        C = self.params['W2'].shape[1]  # Number of classes
+        N = X.shape[0]
+        
+        # Compute softmax loss
+        scores -= np.max(scores, axis=1, keepdims=True)
+        exp_scores = np.exp(scores)
+        softmax = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+        loss = -1 * np.sum(np.log(softmax[np.arange(N), y]))
+        loss /= N
+        loss += 0.5 * self.reg * np.sum(self.params['W1'] * self.params['W1'])
+        loss += 0.5 * self.reg * np.sum(self.params['W2'] * self.params['W2'])
+        
+        # Compute gradients
+        softmax[np.arange(N), y] -= 1
+        dW2 = output1.T.dot(softmax)
+        dW2 /= N
+        dW2 += self.reg * self.params['W2']
+        grads['W2'] = dW2
+        grads['b2'] = np.sum(softmax, axis=0) / N
+        
+        doutput1 = softmax.dot(self.params['W2'].T)
+        doutput1[output1 <= 0] = 0
+        dW1 = X.T.dot(doutput1)
+        dW1 /= N
+        dW1 += self.reg * self.params['W1']
+        grads['W1'] = dW1
+        grads['b1'] = np.sum(doutput1, axis=0) / N
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

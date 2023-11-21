@@ -57,13 +57,13 @@ def softmax_loss_naive(W, X, y, reg):
 
     # (total loss) = (data loss) + (regularization loss)
     # (data loss) = loss / N
-    # (regularization loss) = 0.5 * reg * sum(W^2)
+    # (regularization loss) = reg * sum(W^2)
     loss /= N
     loss += 0.5 * reg * np.sum(W * W)
     
     # (total gradient) = (data gradient) + (regularization gradient)
     # (data gradient) = dW / N
-    # (regularization gradient) = 2 * reg * W
+    # (regularization gradient) = reg * W
     dW /= N
     dW += reg * W
 
