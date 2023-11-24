@@ -127,7 +127,6 @@ def relu_backward(dout, cache):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     # Compute the backward pass
-    dx = dout
     dx = dout * (x > 0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -817,7 +816,21 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    N = x.shape[0] # Number of training examples
+    
+    # Calulate loss
+    # Ensure numeric stability (from https://cs231n.github.io/linear-classify/#softmax)
+    # Shift score values so that the highest value is 0
+    scores = x - np.max(x, axis=1, keepdims=True)
+    exp_scores = np.exp(scores)
+    softmax = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    loss = np.sum(-1 * np.log(softmax[np.arange(N), y]))
+    loss /= N
+    
+    # Calculate gradient
+    dx = softmax.copy()
+    dx[np.arange(N), y] -= 1
+    dx /= N
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
